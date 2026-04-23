@@ -80,6 +80,110 @@ docs/
     └── design_tokens.json
 ```
 
+## 포크 & 로컬 셋업 가이드
+
+이 하네스를 포크해서 자신의 Flutter 프로젝트에 적용하는 방법입니다.
+
+### 사전 요구사항
+
+- [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) 설치 완료
+- Git, Flutter SDK, Python 3.10+ 설치
+- GitHub 계정
+
+### Step 1. 포크 & 클론
+
+```bash
+# 1. GitHub에서 Fork 버튼 클릭 (https://github.com/jay7717/harness_flutter_app)
+
+# 2. 포크한 리포 클론
+git clone https://github.com/<your-username>/harness_flutter_app.git
+cd harness_flutter_app
+```
+
+### Step 2. 프로젝트 커스터마이징
+
+#### 2-1. `CLAUDE.md` 수정 — 프로젝트명 및 컨벤션
+
+파일 상단의 프로젝트명과 코딩 컨벤션을 자신의 프로젝트에 맞게 수정합니다.
+
+```markdown
+# <내 프로젝트명> - Flutter App Development Project
+```
+
+필요에 따라 아래 항목을 조정:
+- Flutter SDK / Dart 버전
+- 아키텍처 패턴 (Clean Architecture, MVVM 등)
+- 상태 관리 (Riverpod, BLoC 등)
+- 추가 코딩 컨벤션
+
+#### 2-2. `docs/SERVICE_BLUEPRINT.md` 수정 — 서비스 정의
+
+자신의 서비스에 맞게 작성합니다:
+- 서비스 정의, 핵심 가치
+- 타겟 사용자
+- 사용자 여정 (User Journey)
+
+#### 2-3. `docs/design/` 수정 — 디자인 시스템
+
+- `DESIGN_SYSTEM.md`: 색상, 타이포그래피, 간격, 컴포넌트 규칙
+- `design_tokens.json`: 코드에서 참조할 디자인 토큰 값
+
+### Step 3. Flutter 프로젝트 초기화 (신규인 경우)
+
+```bash
+flutter create . --org com.yourcompany --project-name your_app
+flutter pub get
+```
+
+기존 Flutter 프로젝트에 하네스를 추가하는 경우, `lib/`가 이미 있으면 이 단계는 스킵합니다.
+
+### Step 4. Claude Code에서 실행
+
+```bash
+# 프로젝트 디렉토리에서 Claude Code 실행
+claude
+
+# 하네스 시작 — 만들고 싶은 기능을 설명
+/harness 커피챗 예약 기능 구현
+```
+
+Claude Code가 자동으로:
+1. **Phase 1**: 요구사항 분석 → 사용자 확인 요청
+2. **Phase 2**: 기존 코드 탐색 (신규면 스킵)
+3. **Phase 3**: TASK 분해 + 병렬 실행 계획 → 사용자 승인 요청
+4. **Phase 4**: 서브에이전트 병렬 구현 + `dart analyze` 검증
+5. **Phase 5**: 독립 검증 → PASS/FAIL 판정
+
+### Step 5. 세션 관리
+
+```bash
+# Claude Code 내에서:
+/harness --status           # 현재 진행 상태 확인
+/harness --resume           # 중단된 세션 이어서 진행
+/harness --stop             # 세션 중단 (나중에 resume)
+/harness --list             # 전체 세션 목록
+/harness --phase 4          # 특정 Phase부터 재시작
+```
+
+### 커스터마이징 포인트 요약
+
+| 파일 | 수정 내용 | 필수 여부 |
+|------|-----------|-----------|
+| `CLAUDE.md` | 프로젝트명, SDK 버전, 코딩 컨벤션 | **필수** |
+| `docs/SERVICE_BLUEPRINT.md` | 서비스 정의, 사용자 여정 | **필수** |
+| `docs/design/DESIGN_SYSTEM.md` | 디자인 시스템 규칙 | 프론트엔드 시 필수 |
+| `docs/design/design_tokens.json` | 디자인 토큰 값 | 프론트엔드 시 필수 |
+| `docs/TASK_TEMPLATE.md` | TASK 양식 커스터마이징 | 선택 |
+| `.claude_harness/phases/*.md` | Phase 프롬프트 커스터마이징 | 선택 |
+| `.claude/commands/harness.md` | 스킬 동작 수정 | 선택 |
+
+### 주의사항
+
+- `/harness` 커맨드는 **Claude Code CLI 환경에서만** 동작합니다 (`.claude/commands/`에 등록된 스킬)
+- Phase 1, 3에서 **사용자 승인 없이 다음 단계로 넘어가지 않습니다** — 반드시 확인 후 승인
+- Phase 4 병렬 실행 시 에이전트 간 **파일 충돌이 없도록** Plan 단계에서 소유권을 배정합니다
+- Execute/Evaluate 실패 시 **최대 3회** Plan으로 자동 루프백합니다
+
 ## Flutter 코딩 컨벤션
 
 - SDK: Dart ^3.8.1
